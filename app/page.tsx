@@ -18,6 +18,7 @@ export default function Page() {
     const [bookCode, setBookCode] = useState('');
     const [selectedStory, setSelectedStory] = useState<number | null>(null);
     const [stories, setStories] = useState<Story[]>([]);
+    const [hasVoted, setHasVoted] = useState(false);
 
     const handleLogin = async () => {
         console.log(bookCode);
@@ -37,6 +38,7 @@ export default function Page() {
 
             if (response.ok) {
                 setIsLoggedIn(true);
+                setHasVoted(data.hasVoted);
                 toast.success('Đăng nhập thành công!', {
                     style: {
                         background: '#333',
@@ -79,6 +81,7 @@ export default function Page() {
             const data = await response.json();
             
             if (response.ok) {
+                setHasVoted(true);
                 toast.success('Bầu chọn thành công!', {
                     style: {
                         background: '#333',
@@ -184,10 +187,12 @@ export default function Page() {
                                             <span>👤</span>
                                             <span>{story.author}</span>
                                         </div>
-                                        <div className="flex items-center gap-2">
-                                            <span>👍</span>
-                                            <span>{story.votes[0]?.count}</span>
-                                        </div>
+                                        {hasVoted && (
+                                            <div className="flex items-center gap-2">
+                                                <span>👍</span>
+                                                <span>{story.votes[0]?.count}</span>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             ))}

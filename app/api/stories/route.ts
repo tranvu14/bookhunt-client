@@ -12,7 +12,7 @@ export async function GET() {
 
     if (error) {
         console.log(error);
-        return NextResponse.json({ error: 'Failed to fetch stories' }, { status: 500 });
+        return NextResponse.json({ error: 'Không thể tải danh sách câu chuyện' }, { status: 500 });
     }
 
     return NextResponse.json(stories);

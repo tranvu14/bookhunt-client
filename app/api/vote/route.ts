@@ -9,13 +9,13 @@ const supabase = createClient<Database>(
 
 export async function POST(req: Request) {
   if (req.method !== "POST") {
-    return NextResponse.json({ error: "Method Not Allowed" }, { status: 405 });
+    return NextResponse.json({ error: "Phương thức không được phép" }, { status: 405 });
   }
 
   const { book_code, story_id } = await req.json();
 
   if (!book_code || !story_id) {
-    return NextResponse.json({ error: "Book code and story ID are required" }, { status: 400 });
+    return NextResponse.json({ error: "Yêu cầu mã sách và ID câu chuyện" }, { status: 400 });
   }
 
   // Check if the user exists and has not voted yet
@@ -27,7 +27,7 @@ export async function POST(req: Request) {
     .single();
 
   if (userError || !user) {
-    return NextResponse.json({ error: "Invalid book code or already voted" }, { status: 403 });
+    return NextResponse.json({ error: "Mã sách không hợp lệ hoặc đã bầu chọn" }, { status: 403 });
   }
 
   // Insert the vote
@@ -35,13 +35,13 @@ export async function POST(req: Request) {
 
   if (voteError) {
     console.log(voteError);
-    return NextResponse.json({ error: "Failed to submit vote" }, { status: 500 });
+    return NextResponse.json({ error: "Không thể gửi bầu chọn" }, { status: 500 });
   }
 
   // Mark user as has_voted
   await supabase.from("users").update({ has_voted: true }).eq("id", user.id);
 
-  return NextResponse.json({ message: "Vote submitted successfully" });
+  return NextResponse.json({ message: "Bầu chọn thành công" });
 }
 
 

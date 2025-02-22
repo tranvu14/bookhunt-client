@@ -11,7 +11,7 @@ export async function POST(request: Request) {
   const { book_code } = await request.json();
 
   if (!book_code) {
-    return NextResponse.json({ error: 'Book code is required' }, { status: 400 });
+    return NextResponse.json({ error: 'Vui lòng nhập mã sách' }, { status: 400 });
   }
 
   // Check if the book code is valid
@@ -23,8 +23,9 @@ export async function POST(request: Request) {
     .single();
 
   if (error || !codeRecord) {
-    return NextResponse.json({ error: 'Invalid or already used code' }, { status: 401 });
+    return NextResponse.json({ error: 'Mã không hợp lệ hoặc đã được sử dụng' }, { status: 401 });
   }
+
   // Find the user with the book code
   const { data: existingUser, error: userError } = await supabase
     .from('users')
@@ -35,17 +36,25 @@ export async function POST(request: Request) {
   if (!existingUser) {
     // Create a user with the book code and authenticated session
     const { data: user, error: userError } = await supabase
-    .from('users')
-    .insert([{ book_code, has_voted: false }])
-    .select()
-    .single();
+      .from('users')
+      .insert([{ book_code, has_voted: false }])
+      .select()
+      .single();
 
     if (userError) {
-        return NextResponse.json({ error: 'Failed to create user' }, { status: 500 });
+      return NextResponse.json({ error: 'Không thể tạo người dùng mới' }, { status: 500 });
     }
 
-    return NextResponse.json({ message: 'Login successful', user });
+    return NextResponse.json({ 
+      message: 'Đăng nhập thành công', 
+      user,
+      hasVoted: false 
+    });
   }
 
-  return NextResponse.json({ message: 'Login successful', existingUser });
+  return NextResponse.json({ 
+    message: 'Đăng nhập thành công', 
+    user: existingUser,
+    hasVoted: existingUser.has_voted 
+  });
 }
