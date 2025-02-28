@@ -97,7 +97,7 @@ export default function Page() {
                     }
                     return story;
                   }));
-                // Refresh stories after successful vote
+
                 const updatedStories = await fetchStories();
                 setStories(updatedStories);
             } else {
