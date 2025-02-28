@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
+import { useStories, useVote } from './hooks/useStories'
+import { useLogin } from './hooks/useAuth'
 
 interface Story {
     id: number;
@@ -17,105 +19,34 @@ export default function Page() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [bookCode, setBookCode] = useState('');
     const [selectedStory, setSelectedStory] = useState<number | null>(null);
-    const [stories, setStories] = useState<Story[]>([]);
-    const [hasVoted, setHasVoted] = useState(false);
+    const { data: stories, isLoading, error } = useStories()
+    const voteMutation = useVote()
+    const loginMutation = useLogin()
 
-    const handleLogin = async () => {
-        console.log(bookCode);
-
-        if (!bookCode) return;
-
+    const handleLogin = async (e: React.FormEvent) => {
+        e.preventDefault()
+        
         try {
-            const response = await fetch('/api/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ book_code: bookCode }),
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                setIsLoggedIn(true);
-                setHasVoted(data.hasVoted);
-                toast.success('Đăng nhập thành công!', {
-                    style: {
-                        background: '#333',
-                        color: '#fff',
-                    },
-                });
-            } else {
-                toast.error(data.error || 'Đăng nhập thất bại', {
-                    style: {
-                        background: '#333',
-                        color: '#fff',
-                    },
-                });
-            }
-        } catch (error) {
-            console.error('Error during login:', error);
-            toast.error('Đã xảy ra lỗi khi đăng nhập', {
-                style: {
-                    background: '#333',
-                    color: '#fff',
-                },
-            });
+            const result = await loginMutation.mutateAsync(bookCode)
+            setIsLoggedIn(true)
+            toast.success('Đăng nhập thành công!')
+        } catch (err) {
+            console.error('Login failed:', err)
+            toast.error(err instanceof Error ? err.message : 'Đăng nhập thất bại')
         }
-    };
-
-    const fetchStories = async () => {
-        const timestamp = new Date().getTime();
-        const response = await fetch(`/api/stories?t=${timestamp}`, {
-            cache: 'no-store',
-            headers: {
-                'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
-                'Pragma': 'no-cache',
-            },
-            next: { revalidate: 0 }
-        });
-        const data = await response.json();
-        return data;
-    };
+    }
 
     const handleVote = async (storyId: number) => {
-        try {
-            const response = await fetch('/api/vote', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ book_code: bookCode, story_id: storyId }),
-            });
-            const data = await response.json();
-            
-            if (response.ok) {
-                setHasVoted(true);
-                toast.success('Bầu chọn thành công!', {
-                    style: {
-                        background: '#333',
-                        color: '#fff',
-                    },
-                });
+        if (!bookCode) return
 
-                const updatedStories = await fetchStories();
-                setStories(updatedStories);
-            } else {
-                toast.error(data.error || 'Bầu chọn thất bại', {
-                    style: {
-                        background: '#333',
-                        color: '#fff',
-                    },
-                });
-            }
-        } catch (error) {
-            console.error('Error during voting:', error);
-            toast.error('Đã xảy ra lỗi khi bầu chọn', {
-                style: {
-                    background: '#333',
-                    color: '#fff',
-                },
-            });
+        try {
+            await voteMutation.mutateAsync({ storyId, bookCode })
+            toast.success('Bầu chọn thành công!')
+        } catch (err) {
+            console.error('Failed to vote:', err)
+            toast.error(err instanceof Error ? err.message : 'Không thể bầu chọn')
         }
-    };
+    }
 
     const handleLogout = () => {
         setIsLoggedIn(false);
@@ -123,11 +54,8 @@ export default function Page() {
         setSelectedStory(null);
     };
 
-    useEffect(() => {
-        fetchStories().then((stories) => {
-            setStories(stories);
-        });
-    }, []);
+    if (isLoading) return <div>Loading...</div>
+    if (error) return <div>Error: {error.message}</div>
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-red-900 via-red-950 to-black text-white">
@@ -174,7 +102,7 @@ export default function Page() {
                 <div className="space-y-6">
                     <h2 className="text-2xl font-semibold mb-6">Bảng xếp hạng</h2>
                     <div className="grid gap-6">
-                        {stories?.length > 0 &&
+                        {stories && stories.length > 0 &&
                             stories.sort((a, b) => b.votes[0]?.count - a.votes[0]?.count).map((story) => (
                                 <div
                                     key={story.id}
@@ -193,9 +121,18 @@ export default function Page() {
                                             <span>👤</span>
                                             <span>{story.author}</span>
                                         </div>
-                                        {hasVoted && (
+                                        {isLoggedIn && (
                                             <div className="flex items-center gap-2">
-                                                <span>👍</span>
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleVote(story.id);
+                                                    }}
+                                                    disabled={voteMutation.isPending}
+                                                    className="text-green-500 hover:text-green-700"
+                                                >
+                                                    👍
+                                                </button>
                                                 <span>{story.votes[0]?.count}</span>
                                             </div>
                                         )}
