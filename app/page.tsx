@@ -65,9 +65,16 @@ export default function Page() {
     };
 
     const fetchStories = async () => {
-        const response = await fetch('/api/stories');
+        const timestamp = new Date().getTime();
+        const response = await fetch(`/api/stories?t=${timestamp}`, {
+            cache: 'no-store',
+            headers: {
+                'Cache-Control': 'no-cache',
+                'Pragma': 'no-cache',
+            },
+            next: { revalidate: 0 }
+        });
         const data = await response.json();
-        console.log(data);
         return data;
     };
 
@@ -88,15 +95,6 @@ export default function Page() {
                         color: '#fff',
                     },
                 });
-                setStories(stories.map(story => {
-                    if (story.id === storyId) {
-                      return {
-                        ...story,
-                        votes: [{ count: (story.votes[0]?.count || 0) + 1 }]
-                      };
-                    }
-                    return story;
-                  }));
 
                 const updatedStories = await fetchStories();
                 setStories(updatedStories);

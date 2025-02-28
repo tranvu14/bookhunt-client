@@ -10,7 +10,10 @@ const supabase = createClient<Database>(
 export async function GET() {
   const { data: stories, error } = await supabase
     .from("stories")
-    .select(`*, votes(count)`);
+    .select(`
+      *,
+      votes: votes(count)
+    `);
 
   if (error) {
     console.log(error);
@@ -19,7 +22,10 @@ export async function GET() {
       { 
         status: 500,
         headers: {
-          'Cache-Control': 'no-store'
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0',
+          'Surrogate-Control': 'no-store'
         }
       }
     );
@@ -27,7 +33,10 @@ export async function GET() {
 
   return NextResponse.json(stories, {
     headers: {
-      'Cache-Control': 'no-store'
+      'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0',
+      'Surrogate-Control': 'no-store'
     }
   });
 }
