@@ -69,7 +69,7 @@ export default function Page() {
         const response = await fetch(`/api/stories?t=${timestamp}`, {
             cache: 'no-store',
             headers: {
-                'Cache-Control': 'no-cache',
+                'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
                 'Pragma': 'no-cache',
             },
             next: { revalidate: 0 }
@@ -125,7 +125,6 @@ export default function Page() {
 
     useEffect(() => {
         fetchStories().then((stories) => {
-            console.log(stories);
             setStories(stories);
         });
     }, []);
