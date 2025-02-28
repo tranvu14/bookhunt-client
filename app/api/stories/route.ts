@@ -8,12 +8,26 @@ const supabase = createClient<Database>(
 );
 
 export async function GET() {
-  const { data: stories, error } = await supabase.from("stories").select(`*, votes(count)`);
+  const { data: stories, error } = await supabase
+    .from("stories")
+    .select(`*, votes(count)`);
 
-    if (error) {
-        console.log(error);
-        return NextResponse.json({ error: 'Không thể tải danh sách câu chuyện' }, { status: 500 });
+  if (error) {
+    console.log(error);
+    return NextResponse.json(
+      { error: 'Không thể tải danh sách câu chuyện' }, 
+      { 
+        status: 500,
+        headers: {
+          'Cache-Control': 'no-store'
+        }
+      }
+    );
+  }
+
+  return NextResponse.json(stories, {
+    headers: {
+      'Cache-Control': 'no-store'
     }
-
-    return NextResponse.json(stories);
+  });
 }

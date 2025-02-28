@@ -88,6 +88,15 @@ export default function Page() {
                         color: '#fff',
                     },
                 });
+                setStories(stories.map(story => {
+                    if (story.id === storyId) {
+                      return {
+                        ...story,
+                        votes: [{ count: (story.votes[0]?.count || 0) + 1 }]
+                      };
+                    }
+                    return story;
+                  }));
                 // Refresh stories after successful vote
                 const updatedStories = await fetchStories();
                 setStories(updatedStories);
