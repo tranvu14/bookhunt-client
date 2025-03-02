@@ -12,7 +12,7 @@ export function useStories() {
   return useQuery<Story[]>({
     queryKey: ['stories'],
     queryFn: async () => {
-      const res = await fetch('/api/stories', {
+      const res = await fetch('/api/stories?t=' + Date.now(), {
         headers: {
           'Pragma': 'no-cache',
           'Cache-Control': 'no-cache, no-store, must-revalidate',
