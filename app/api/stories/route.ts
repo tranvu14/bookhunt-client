@@ -13,10 +13,20 @@ export async function GET() {
     console.log(error);
     return NextResponse.json(
       { error: 'Không thể tải danh sách câu chuyện' }, 
-      { status: 500 }
+      { 
+        status: 500,
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate',
+          'Pragma': 'no-cache'
+        }
+      }
     );
   }
 
-  // Return without cache headers to allow real-time updates
-  return NextResponse.json(stories);
+  return NextResponse.json(stories, {
+    headers: {
+      'Cache-Control': 'no-store, no-cache, must-revalidate',
+      'Pragma': 'no-cache'
+    }
+  });
 }

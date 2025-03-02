@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { supabase } from "@/lib/supabase";
-import { Database } from '@/types/supabase';
 
 export async function POST(request: Request) {
   const { book_code } = await request.json();

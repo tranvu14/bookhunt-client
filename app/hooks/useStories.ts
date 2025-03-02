@@ -13,8 +13,10 @@ export function useStories() {
     queryKey: ['stories'],
     queryFn: async () => {
       const res = await fetch('/api/stories', {
-        // Add cache control headers on the client side
-        cache: 'no-store',
+        headers: {
+          'Pragma': 'no-cache',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+        },
         next: { revalidate: 0 }
       })
       if (!res.ok) {
@@ -22,9 +24,10 @@ export function useStories() {
       }
       return res.json()
     },
-    // Add these options to override the global config when needed
     refetchInterval: 1000 * 30, // Refetch every 30 seconds
-    refetchOnReconnect: true
+    refetchOnReconnect: true,
+    // Disable caching in React Query
+    staleTime: 0,
   })
 }
 

@@ -1,20 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useStories, useVote } from './hooks/useStories'
 import { useLogin } from './hooks/useAuth'
 import LoadingSpinner from './components/LoadingSpinner'
 
-interface Story {
-  id: number;
-  title: string;
-  description: string;
-  author: string;
-  votes: {
-    count: number;
-  }[];
-}
 
 export default function Page() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
