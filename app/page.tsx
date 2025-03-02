@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useStories, useVote } from './hooks/useStories'
 import { useLogin } from './hooks/useAuth'
+import LoadingSpinner from './components/LoadingSpinner'
 
 interface Story {
   id: number;
@@ -57,11 +58,53 @@ export default function Page() {
     setSelectedStory(null);
   };
 
-  if (isLoading) return <div>Loading...</div>
+  if (isLoading) return (
+    <div className="min-h-screen bg-gradient-to-br from-red-900 via-red-950 to-black text-white flex items-center justify-center">
+      <div className="text-center space-y-4">
+        <LoadingSpinner className="mx-auto h-8 w-8" />
+        <p className="text-white/80">Đang tải dữ liệu...</p>
+      </div>
+    </div>
+  )
+
   if (error) return <div>Error: {error.message}</div>
 
   const sortedStories = hasVoted ? stories?.sort((a, b) => b.votes[0]?.count - a.votes[0]?.count) : stories
   
+  const loginButton = (
+    <button
+      onClick={handleLogin}
+      disabled={loginMutation.isPending}
+      className="w-full py-3 px-6 bg-gradient-to-r from-red-600 to-red-800 rounded-lg font-semibold hover:opacity-90 transform hover:scale-105 transition disabled:opacity-50 disabled:transform-none flex items-center justify-center"
+    >
+      {loginMutation.isPending ? (
+        <>
+          <LoadingSpinner className="mr-2" />
+          Đang đăng nhập...
+        </>
+      ) : (
+        'Đăng nhập để bầu chọn'
+      )}
+    </button>
+  )
+
+  const voteButton = (
+    <button
+      onClick={() => handleVote(selectedStory!)}
+      disabled={voteMutation.isPending}
+      className="w-full py-3 px-6 bg-gradient-to-r from-red-700 to-red-900 rounded-lg font-semibold hover:opacity-90 transition disabled:opacity-50 flex items-center justify-center"
+    >
+      {voteMutation.isPending ? (
+        <>
+          <LoadingSpinner className="mr-2" />
+          Đang bầu chọn...
+        </>
+      ) : (
+        'Bầu chọn'
+      )}
+    </button>
+  )
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-900 via-red-950 to-black text-white">
       <div className="absolute top-4 right-4 flex items-center gap-4">
@@ -92,14 +135,10 @@ export default function Page() {
                 value={bookCode}
                 onChange={(e) => setBookCode(e.target.value)}
                 placeholder="Nhập mã"
-                className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 focus:border-red-500 focus:ring-2 focus:ring-red-500 outline-none transition"
+                disabled={loginMutation.isPending}
+                className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 focus:border-red-500 focus:ring-2 focus:ring-red-500 outline-none transition disabled:opacity-50"
               />
-              <button
-                onClick={handleLogin}
-                className="w-full py-3 px-6 bg-gradient-to-r from-red-600 to-red-800 rounded-lg font-semibold hover:opacity-90 transform hover:scale-105 transition"
-              >
-                Đăng nhập để bầu chọn
-              </button>
+              {loginButton}
             </div>
           </div>
         )}
@@ -144,14 +183,7 @@ export default function Page() {
                 </div>
               ))}
           </div>
-          {isLoggedIn && selectedStory && (
-            <button
-              onClick={() => handleVote(selectedStory)}
-              className="w-full py-3 px-6 bg-gradient-to-r from-red-700 to-red-900 rounded-lg font-semibold hover:opacity-90 transition"
-            >
-              Bầu chọn
-            </button>
-          )}
+          {isLoggedIn && selectedStory && voteButton}
         </div>
       </div>
     </div>

@@ -1,11 +1,6 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { supabase } from "@/lib/supabase";
 import { Database } from "@/types/supabase"; // Import generated types
-
-const supabase = createClient<Database>(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
 
 export async function POST(req: Request) {
   if (req.method !== "POST") {
@@ -43,7 +38,6 @@ export async function POST(req: Request) {
 
   return NextResponse.json({ message: "Bầu chọn thành công" });
 }
-
 
 export async function GET() {
   const { data: votes, error } = await supabase.from("votes").select("*");

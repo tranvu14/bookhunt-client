@@ -1,16 +1,5 @@
-import { createClient } from "@supabase/supabase-js";
-import { Database } from "@/types/supabase"; // Import generated types
+import { supabase } from "@/lib/supabase";
 import { NextResponse } from "next/server";
-
-// Add environment variable validation
-if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-  throw new Error('Missing Supabase environment variables');
-}
-
-const supabase = createClient<Database>(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
 
 export async function GET() {
   const { data: stories, error } = await supabase
