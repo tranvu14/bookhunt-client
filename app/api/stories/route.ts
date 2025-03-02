@@ -24,26 +24,10 @@ export async function GET() {
     console.log(error);
     return NextResponse.json(
       { error: 'Không thể tải danh sách câu chuyện' }, 
-      { 
-        status: 500,
-        headers: {
-          'Content-Type': 'application/json',
-          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
-          'Pragma': 'no-cache',
-          'Expires': '0',
-          'Surrogate-Control': 'no-store'
-        }
-      }
+      { status: 500 }
     );
   }
 
-  return NextResponse.json(stories, {
-    headers: {
-      'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
-      'Pragma': 'no-cache',
-      'Expires': '0',
-      'Surrogate-Control': 'no-store',
-      'Content-Type': 'application/json'
-    }
-  });
+  // Return without cache headers to allow real-time updates
+  return NextResponse.json(stories);
 }

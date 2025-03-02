@@ -12,12 +12,19 @@ export function useStories() {
   return useQuery<Story[]>({
     queryKey: ['stories'],
     queryFn: async () => {
-      const res = await fetch('/api/stories')
+      const res = await fetch('/api/stories', {
+        // Add cache control headers on the client side
+        cache: 'no-store',
+        next: { revalidate: 0 }
+      })
       if (!res.ok) {
         throw new Error('Không thể tải danh sách câu chuyện')
       }
       return res.json()
-    }
+    },
+    // Add these options to override the global config when needed
+    refetchInterval: 1000 * 30, // Refetch every 30 seconds
+    refetchOnReconnect: true
   })
 }
 
